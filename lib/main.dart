@@ -5,6 +5,32 @@ void main() {
   runApp(const TharwaApp());
 }
 
+class Animal {
+  final String number;
+  final String type;
+  final String sex;
+  final String breed;
+  final String birthDate;
+  final String weight;
+  final String health;
+  final String source;
+  final String price;
+  final String notes;
+
+  Animal({
+    required this.number,
+    required this.type,
+    required this.sex,
+    required this.breed,
+    required this.birthDate,
+    required this.weight,
+    required this.health,
+    required this.source,
+    required this.price,
+    required this.notes,
+  });
+}
+
 class TharwaApp extends StatelessWidget {
   const TharwaApp({super.key});
 
@@ -16,27 +42,13 @@ class TharwaApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF287A55),
+          seedColor: const Color(0xFF38A96B),
         ),
         fontFamily: 'Arial',
       ),
       home: const HomePage(),
     );
   }
-}
-
-class Animal {
-  String number;
-  String type;
-  String sex;
-  String notes;
-
-  Animal({
-    required this.number,
-    required this.type,
-    required this.sex,
-    required this.notes,
-  });
 }
 
 class HomePage extends StatefulWidget {
@@ -48,220 +60,18 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final List<Animal> animals = [];
-  int selectedIndex = 0;
 
-  int getCount(String type) =>
-      animals.where((animal) => animal.type == type).length;
-
-  void addAnimal() {
-    final numberController = TextEditingController();
-    final notesController = TextEditingController();
-    String type = 'أغنام';
-    String sex = 'ذكر';
-
-    showDialog(
-      context: context,
-      builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: const Text('إضافة حيوان جديد'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: numberController,
-                  decoration: const InputDecoration(
-                    labelText: 'رقم الحيوان أو الوسم',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                DropdownButtonFormField<String>(
-                  value: type,
-                  decoration: const InputDecoration(
-                    labelText: 'نوع الحيوان',
-                    border: OutlineInputBorder(),
-                  ),
-                  items: ['أغنام', 'ماعز', 'إبل']
-                      .map((e) => DropdownMenuItem(
-                            value: e,
-                            child: Text(e),
-                          ))
-                      .toList(),
-                  onChanged: (value) {
-                    if (value != null) {
-                      setDialogState(() => type = value);
-                    }
-                  },
-                ),
-                const SizedBox(height: 12),
-                DropdownButtonFormField<String>(
-                  value: sex,
-                  decoration: const InputDecoration(
-                    labelText: 'الجنس',
-                    border: OutlineInputBorder(),
-                  ),
-                  items: ['ذكر', 'أنثى']
-                      .map((e) => DropdownMenuItem(
-                            value: e,
-                            child: Text(e),
-                          ))
-                      .toList(),
-                  onChanged: (value) {
-                    if (value != null) {
-                      setDialogState(() => sex = value);
-                    }
-                  },
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: notesController,
-                  maxLines: 2,
-                  decoration: const InputDecoration(
-                    labelText: 'ملاحظات',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('إلغاء'),
-            ),
-            FilledButton(
-              onPressed: () {
-                final number = numberController.text.trim();
-                if (number.isEmpty) return;
-
-                setState(() {
-                  animals.add(Animal(
-                    number: number,
-                    type: type,
-                    sex: sex,
-                    notes: notesController.text.trim(),
-                  ));
-                });
-
-                Navigator.pop(dialogContext);
-                ScaffoldMessenger.of(this.context).showSnackBar(
-                  const SnackBar(content: Text('تمت إضافة الحيوان')),
-                );
-              },
-              child: const Text('حفظ'),
-            ),
-          ],
-        ),
+  Future<void> addAnimal() async {
+    final animal = await Navigator.push<Animal>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const AddAnimalPage(),
       ),
     );
-  }
 
-  Widget statCard(String title, int count, IconData icon) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Icon(icon, size: 30, color: Colors.green),
-            const SizedBox(height: 8),
-            Text(
-              '$count',
-              style: const TextStyle(
-                fontSize: 25,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(title),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget dashboard() {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        const Text(
-          'مرحباً بك في ثروة',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 6),
-        const Text('إدارة مزرعتك وحيواناتك بسهولة'),
-        const SizedBox(height: 20),
-        GridView.count(
-          crossAxisCount: 2,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          children: [
-            statCard('إجمالي الحيوانات', animals.length, Icons.pets),
-            statCard('الأغنام', getCount('أغنام'), Icons.agriculture),
-            statCard('الماعز', getCount('ماعز'), Icons.pets),
-            statCard('الإبل', getCount('إبل'), Icons.landscape),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Card(
-          child: ListTile(
-            leading: const Icon(Icons.add_circle, color: Colors.green),
-            title: const Text('إضافة حيوان جديد'),
-            subtitle: const Text('تسجيل حيوان في سجلات المزرعة'),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-            onTap: addAnimal,
-          ),
-        ),
-        Card(
-          child: ListTile(
-            leading: const Icon(Icons.list_alt),
-            title: const Text('سجل الحيوانات'),
-            subtitle: Text('عدد الحيوانات المسجلة: ${animals.length}'),
-            onTap: () => setState(() => selectedIndex = 1),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget animalList() {
-    if (animals.isEmpty) {
-      return const Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.pets, size: 65, color: Colors.grey),
-            SizedBox(height: 12),
-            Text('لا توجد حيوانات مسجلة حتى الآن'),
-            Text('اضغط + لإضافة أول حيوان'),
-          ],
-        ),
-      );
+    if (animal != null) {
+      setState(() => animals.add(animal));
     }
-
-    return ListView.builder(
-      padding: const EdgeInsets.all(12),
-      itemCount: animals.length,
-      itemBuilder: (context, index) {
-        final animal = animals[index];
-        return Card(
-          child: ListTile(
-            leading: const CircleAvatar(
-              child: Icon(Icons.pets),
-            ),
-            title: Text('${animal.type} - ${animal.number}'),
-            subtitle: Text(
-              '${animal.sex}  ${animal.notes.isEmpty ? "" : "• ${animal.notes}"}',
-            ),
-            trailing: IconButton(
-              icon: const Icon(Icons.delete_outline, color: Colors.red),
-              onPressed: () {
-                setState(() => animals.removeAt(index));
-              },
-            ),
-          ),
-        );
-      },
-    );
   }
 
   @override
@@ -274,29 +84,291 @@ class _HomePageState extends State<HomePage> {
             'ثروة | THARWA',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
-          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+          backgroundColor: const Color(0xFFA8EFC7),
         ),
-        body: selectedIndex == 0 ? dashboard() : animalList(),
         floatingActionButton: FloatingActionButton(
           onPressed: addAnimal,
           child: const Icon(Icons.add),
         ),
-        bottomNavigationBar: NavigationBar(
-          selectedIndex: selectedIndex,
-          onDestinationSelected: (index) {
-            setState(() => selectedIndex = index);
-          },
-          destinations: const [
-            NavigationDestination(
-              icon: Icon(Icons.dashboard_outlined),
-              selectedIcon: Icon(Icons.dashboard),
-              label: 'الرئيسية',
+        body: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'مرحباً بك في ثروة',
+                style: TextStyle(
+                  fontSize: 27,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Text('إدارة مزرعتك وحيواناتك بسهولة'),
+              const SizedBox(height: 20),
+              Card(
+                child: ListTile(
+                  leading: const Icon(
+                    Icons.pets,
+                    color: Colors.green,
+                    size: 35,
+                  ),
+                  title: const Text('إجمالي الحيوانات'),
+                  trailing: Text(
+                    '${animals.length}',
+                    style: const TextStyle(
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 15),
+              const Text(
+                'سجل الحيوانات',
+                style: TextStyle(
+                  fontSize: 21,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Expanded(
+                child: animals.isEmpty
+                    ? const Center(
+                        child: Text('لا توجد حيوانات مسجلة'),
+                      )
+                    : ListView.builder(
+                        itemCount: animals.length,
+                        itemBuilder: (context, index) {
+                          final animal = animals[index];
+                          return Card(
+                            child: ListTile(
+                              leading: const CircleAvatar(
+                                child: Icon(Icons.pets),
+                              ),
+                              title: Text(
+                                '${animal.type} - ${animal.number}',
+                              ),
+                              subtitle: Text(
+                                '${animal.sex} | ${animal.weight.isEmpty ? "الوزن غير مسجل" : animal.weight + " كجم"}',
+                              ),
+                              trailing: const Icon(
+                                Icons.arrow_forward_ios,
+                                size: 16,
+                              ),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => AnimalDetailsPage(
+                                      animal: animal,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class AddAnimalPage extends StatefulWidget {
+  const AddAnimalPage({super.key});
+
+  @override
+  State<AddAnimalPage> createState() => _AddAnimalPageState();
+}
+
+class _AddAnimalPageState extends State<AddAnimalPage> {
+  final number = TextEditingController();
+  final breed = TextEditingController();
+  final birthDate = TextEditingController();
+  final weight = TextEditingController();
+  final source = TextEditingController();
+  final price = TextEditingController();
+  final notes = TextEditingController();
+
+  String type = 'أغنام';
+  String sex = 'ذكر';
+  String health = 'سليم';
+
+  @override
+  void dispose() {
+    number.dispose();
+    breed.dispose();
+    birthDate.dispose();
+    weight.dispose();
+    source.dispose();
+    price.dispose();
+    notes.dispose();
+    super.dispose();
+  }
+
+  Widget field(
+    String label,
+    TextEditingController controller, {
+    TextInputType keyboard = TextInputType.text,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 13),
+      child: TextField(
+        controller: controller,
+        keyboardType: keyboard,
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+        ),
+      ),
+    );
+  }
+
+  Widget dropdown(
+    String label,
+    String value,
+    List<String> options,
+    ValueChanged<String?> onChanged,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 13),
+      child: DropdownButtonFormField<String>(
+        value: value,
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+        ),
+        items: options.map((item) {
+          return DropdownMenuItem(
+            value: item,
+            child: Text(item),
+          );
+        }).toList(),
+        onChanged: onChanged,
+      ),
+    );
+  }
+
+  void save() {
+    if (number.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('أدخل رقم الحيوان أولاً')),
+      );
+      return;
+    }
+
+    Navigator.pop(
+      context,
+      Animal(
+        number: number.text.trim(),
+        type: type,
+        sex: sex,
+        breed: breed.text,
+        birthDate: birthDate.text,
+        weight: weight.text,
+        health: health,
+        source: source.text,
+        price: price.text,
+        notes: notes.text,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        appBar: AppBar(title: const Text('إضافة حيوان جديد')),
+        body: ListView(
+          padding: const EdgeInsets.all(18),
+          children: [
+            field('رقم الحيوان أو الوسم *', number),
+            dropdown(
+              'نوع الحيوان',
+              type,
+              ['أغنام', 'ماعز', 'إبل'],
+              (v) => setState(() => type = v!),
             ),
-            NavigationDestination(
-              icon: Icon(Icons.pets_outlined),
-              selectedIcon: Icon(Icons.pets),
-              label: 'الحيوانات',
+            dropdown(
+              'الجنس',
+              sex,
+              ['ذكر', 'أنثى'],
+              (v) => setState(() => sex = v!),
             ),
+            field('السلالة', breed),
+            field('تاريخ الميلاد أو العمر', birthDate),
+            field(
+              'الوزن بالكيلوجرام',
+              weight,
+              keyboard: TextInputType.number,
+            ),
+            dropdown(
+              'الحالة الصحية',
+              health,
+              ['سليم', 'مريض', 'حامل', 'مباع', 'نافق'],
+              (v) => setState(() => health = v!),
+            ),
+            field('مصدر الحيوان أو البائع', source),
+            field(
+              'سعر الشراء',
+              price,
+              keyboard: TextInputType.number,
+            ),
+            field('ملاحظات', notes),
+            const SizedBox(height: 10),
+            FilledButton.icon(
+              onPressed: save,
+              icon: const Icon(Icons.save),
+              label: const Text('حفظ الحيوان'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class AnimalDetailsPage extends StatelessWidget {
+  final Animal animal;
+
+  const AnimalDetailsPage({
+    super.key,
+    required this.animal,
+  });
+
+  Widget info(String label, String value) {
+    return Card(
+      child: ListTile(
+        title: Text(label),
+        subtitle: Text(value.isEmpty ? 'غير مسجل' : value),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        appBar: AppBar(title: const Text('تفاصيل الحيوان')),
+        body: ListView(
+          padding: const EdgeInsets.all(15),
+          children: [
+            info('رقم الحيوان', animal.number),
+            info('النوع', animal.type),
+            info('الجنس', animal.sex),
+            info('السلالة', animal.breed),
+            info('تاريخ الميلاد أو العمر', animal.birthDate),
+            info('الوزن بالكيلوجرام', animal.weight),
+            info('الحالة الصحية', animal.health),
+            info('مصدر الحيوان', animal.source),
+            info('سعر الشراء', animal.price),
+            info('الملاحظات', animal.notes),
           ],
         ),
       ),
